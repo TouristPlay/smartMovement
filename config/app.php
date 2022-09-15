@@ -232,4 +232,14 @@ return [
 
     ],
 
+
+    'telegram' => [
+        'url' => env('TELEGRAM_BOT_API_URL', null),
+        'token' => env('TELEGRAM_BOT_API_TOKEN', null)
+    ],
+
+    'selenium' => [
+        'url' => env('SELENIUM_SERVER_URL', null),
+    ],
+
 ];
