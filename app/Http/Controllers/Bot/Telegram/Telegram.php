@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Bot\Telegram;
 
+use App\Http\Controllers\Bot\Telegram\Menu\TelegramMenu;
 use GuzzleHttp\Exception\GuzzleException;
 
 class Telegram extends TelegramOptions
@@ -20,7 +21,7 @@ class Telegram extends TelegramOptions
      */
     public function messageHandler()
     {
-        $callbackKey = $this->callbackData['data'] ?? null;
+        $callbackKey = $this->callbackData['callbackKey'] ?? null;
 
         // Регистрируем пользователя
         if ($this->message == '/start' && !isset($this->user)) {
@@ -29,12 +30,14 @@ class Telegram extends TelegramOptions
             return;
         }
 
+        $menu = new TelegramMenu($this->options);
+
         // Обрабатываем геолокацию
-        if (isset($this->user) && isset($this->options['data']['message']['location'])) {
+        if (isset($this->user) && isset($this->options['data']['message']['location']) || $this->messageIsMenuKey($callbackKey)) {
 
-            $location = $this->options['data']['message']['location'];
+            $location = $this->options['data']['message']['location'] ?? null;
 
-            dd($location);
+            $menu->handler($location);
 
             return;
         }
@@ -44,7 +47,7 @@ class Telegram extends TelegramOptions
     private function messageIsMenuKey($key) : bool {
 
         $keys = [
-
+            'stops'
         ];
 
         return in_array($key, $keys);

@@ -17,12 +17,9 @@ class StopScheduleService {
     public function getStopSchedule($stop): array
     {
 
-        $city = City::query()->whereId($stop->city_id)->first();
-
         $driver = RemoteWebDriver::create(config('app.selenium.url'), DesiredCapabilities::chrome());
 
-        $driver->get('https://yandex.ru/maps/' . $city->city_id . '/' . $city->slug .  '/stops/' . $stop->stop_id);
-
+        $driver->get($stop->url);
         sleep(1);
 
         $schedule = $driver->findElement(WebDriverBy::className("masstransit-brief-schedule-view__vehicles"));

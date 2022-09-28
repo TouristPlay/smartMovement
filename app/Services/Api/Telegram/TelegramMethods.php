@@ -112,9 +112,9 @@ class TelegramMethods extends TelegramBotAPI {
         $query = [
             'chat_id' => $chat_id,
             'message_id' => $message_id,
-            'reply_markup' => $reply_markup
+            'reply_markup' => json_encode($reply_markup, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK)
         ];
 
-        return $this->sendRequest('editMessageReplyMarkup', );
+        return $this->sendRequest('editMessageReplyMarkup', $query);
     }
 }

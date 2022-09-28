@@ -76,7 +76,6 @@ class TelegramBotAPI {
         $this->log->info('REQUEST: ' . $url);
         $this->log->info(json_encode($options));
 
-
         try {
             $response = $client->request($method, $this->getUrl() . 'bot' . $this->getToken() . '/' . $url, $options);
         } catch (RequestException $exception) {

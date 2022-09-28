@@ -77,7 +77,7 @@ class SyncTransport implements ShouldQueue
 
             foreach ($transports as $transport) {
                 $classList = $transport->getAttribute('class');
-                $transportInfo = $this->getTransportInfo($transport, $classList);
+                $transportInfo = $this->getTransportInfo($transport);
                 $this->storeTransport($transportInfo);
             }
 
@@ -92,10 +92,10 @@ class SyncTransport implements ShouldQueue
      */
     private function getTransports($stop): array
     {
-        $this->driver->get('https://yandex.ru/maps/' . $this->city->city_id . '/' . $this->city->slug .  '/stops/' . $stop->stop_id);
+        $this->driver->get($stop->url);
         sleep(1);
 
-        return $this->driver->findElements(WebDriverBy::className('masstransit-transport-list-view__type-transport'));
+        return $this->driver->findElements(WebDriverBy::className('masstransit-vehicle-snippet-view'));
     }
 
 
@@ -103,7 +103,7 @@ class SyncTransport implements ShouldQueue
      * @param $transport
      * @return array
      */
-    private function getTransportInfo($transport, $classList): array
+    private function getTransportInfo($transport): array
     {
 
         $types = [
@@ -112,13 +112,14 @@ class SyncTransport implements ShouldQueue
             'trolleybus' => '_type_trolleybus',
         ];
 
-        foreach ($types as $key => $type) {
+        $info = $transport->findElement(WebDriverBy::className('masstransit-vehicle-snippet-view__name'));
 
-            if (strripos($classList, $type)) {
+        foreach ($types as $key => $type) {
+            if (strripos($transport->getAttribute('class'), $type)) {
                 return [
-                    'name' => $transport->getText(),
+                    'name' => $info->getText(),
                     'type' => $key,
-                    'slug' => $key . "_" . $this->replaceTransportNameCharacter($transport->getText())
+                    'url' => $info->getAttribute('href')
                 ];
             }
         }
@@ -146,7 +147,7 @@ class SyncTransport implements ShouldQueue
             'name' => $transport['name'],
         ]);
         $systemTransport->type = $transport['type'];
-        $systemTransport->slug = $transport['slug'];
+        $systemTransport->url = 'https://yandex.ru' . $transport['url'];
         $systemTransport->city_id = $this->city->id;
         $systemTransport->save();
     }

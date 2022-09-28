@@ -6,24 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Transport extends Model
+class Message extends Model
 {
     use HasFactory;
 
-
     protected $fillable = [
-        'name',
-        'url',
-        'type',
-        'city_id'
+        'user_id',
+        'message_id',
+        'stop_id'
     ];
-
 
     /**
      * @return HasMany
      */
-    public function city(): HasMany
+    public function user(): HasMany
     {
-        return $this->hasMany(City::class);
+        return $this->hasMany(User::class);
     }
 }
