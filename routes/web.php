@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['prefix' => 'autocomplete'], function () {
-   Route::post('/stop', \App\Jobs\SyncStop::class);
-   Route::post('/transport', \App\Jobs\SyncTransport::class);
+   Route::post('/stop', [\App\Jobs\SyncStop::class, 'handle']);
+   Route::post('/transport', [\App\Jobs\SyncTransport::class, 'handle']);
 });
 
 // TODO подумать как хранить роуты маршрутов или хранить в каждой остановке его роуты
