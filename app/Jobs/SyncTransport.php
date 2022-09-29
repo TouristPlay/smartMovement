@@ -58,7 +58,7 @@ class SyncTransport implements ShouldQueue
         $chromeOptions->addArguments(['-headless']);
         $desiredCapabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
 
-        $driver = RemoteWebDriver::create(config('app.selenium.url'), $desiredCapabilities);
+        $this->driver = RemoteWebDriver::create(config('app.selenium.url'), $desiredCapabilities);
 
         $cities = City::all();
 
