@@ -90,7 +90,6 @@ class SyncTransport implements ShouldQueue
             $transports = $this->getTransports($stop);
 
             foreach ($transports as $transport) {
-                $classList = $transport->getAttribute('class');
                 $transportInfo = $this->getTransportInfo($transport);
                 $this->storeTransport($transportInfo);
             }
