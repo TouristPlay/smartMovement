@@ -55,10 +55,13 @@ class SyncTransport implements ShouldQueue
 
         // Add arguments via FirefoxOptions to start headless firefox
         $chromeOptions = new ChromeOptions();
+        $chromeOptions->addArguments(['---no-sandbox']);
         $chromeOptions->addArguments(['-headless']);
+        $chromeOptions->addArguments(['--disable-dev-shm-usage']);
         $desiredCapabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
 
         $this->driver = RemoteWebDriver::create(config('app.selenium.url'), $desiredCapabilities);
+        sleep(1);
 
         $cities = City::all();
 

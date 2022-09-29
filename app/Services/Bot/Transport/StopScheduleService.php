@@ -25,7 +25,9 @@ class StopScheduleService {
 
         // Add arguments via FirefoxOptions to start headless firefox
         $chromeOptions = new ChromeOptions();
+        $chromeOptions->addArguments(['---no-sandbox']);
         $chromeOptions->addArguments(['-headless']);
+        $chromeOptions->addArguments(['--disable-dev-shm-usage']);
         $desiredCapabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
 
         $driver = RemoteWebDriver::create(config('app.selenium.url'), $desiredCapabilities);
