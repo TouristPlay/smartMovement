@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\City;
 use App\Models\Stop;
+use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
@@ -63,7 +64,17 @@ class SyncStop implements ShouldQueue
      */
     public function getStops($coordinate)
     {
-        $driver = RemoteWebDriver::create(config('app.selenium.url'), DesiredCapabilities::chrome());
+        $desiredCapabilities = DesiredCapabilities::chrome();
+
+        // Disable accepting SSL certificates
+        $desiredCapabilities->setCapability('acceptSslCerts', false);
+
+        // Add arguments via FirefoxOptions to start headless firefox
+        $chromeOptions = new ChromeOptions();
+        $chromeOptions->addArguments(['-headless']);
+        $desiredCapabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
+
+        $driver = RemoteWebDriver::create(config('app.selenium.url'), $desiredCapabilities);
 
         $driver->get('https://yandex.ru/maps/?ll=' . $coordinate['longitude'] . '%2C' . $coordinate['latitude'] . '&mode=search&text=Остановки%20общественного%20транспорта&z=12');
         sleep(1);

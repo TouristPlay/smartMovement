@@ -20,7 +20,7 @@ class Keyboard
         foreach ($elements as $element) {
 
             $button =  [
-                'text' => $element->name,
+                'text' => "🚏 " . $element->name,
                 'callback_data' =>  json_encode([
                     'callbackKey' => 'stops',
                     'data' => $element->id
