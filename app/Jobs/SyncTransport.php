@@ -106,7 +106,7 @@ class SyncTransport implements ShouldQueue
     private function getTransports($stop): array
     {
         $this->driver->get($stop->url);
-        sleep(1);
+        sleep(5);
 
         return $this->driver->findElements(WebDriverBy::className('masstransit-vehicle-snippet-view'));
     }

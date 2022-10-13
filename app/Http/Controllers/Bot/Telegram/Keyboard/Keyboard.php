@@ -6,6 +6,7 @@ class Keyboard
 {
 
     /**
+     * Метод создает клавиатуру для отсановок
      * @param $elements
      * @return void
      */
@@ -42,10 +43,11 @@ class Keyboard
 
 
     /**
+     * Метод создает клавиатуру расписания транспорта
      * @param $elements
      * @return array
      */
-    public function generateStopsScheduleKeyboard($elements) : array {
+    protected function generateStopsScheduleKeyboard($elements) : array {
 
         $transportType = [
             'bus' => '🚌',
@@ -61,36 +63,71 @@ class Keyboard
 
         $allRoutes = 0;
 
-        foreach ($elements as  $element) {
-            foreach ($element as $key => $item) {
+        foreach ($elements as $key => $element) {
 
-                $allRoutes += count($element);
+            if ($key == "stop") continue;
 
-                foreach ($item as $i) {
-                    if (array_key_exists($key, $transportType)) {
-                        $button =  [
-                            'text' => $transportType[$key] . " " . $i['name'] . " - " . $i['arriveTime'] . " [" . $i['lastStation'] . "]",
-                            'callback_data' =>  json_encode([
-                                'callbackKey' => 'transport',
-                                'data' => 1
-                            ]),
-                        ];
+            $allRoutes += count($element);
 
-                        $keyboardRow[] = $button;
+            foreach ($element as $i) {
+                if (array_key_exists($key, $transportType)) {
+                    $button =  [
+                        'text' => $transportType[$key] . " " . $i['name'] . " - " . $i['arriveTime'] . " [" . $i['lastStation'] . "]",
+                        'callback_data' =>  json_encode([
+                            'callbackKey' => 'transport',
+                            'data' => 1
+                        ]),
+                    ];
 
-                        if ($rowCounter % 1 == 0 || count($elements) == $allRoutes) {
-                            $keyboard[] = $keyboardRow;
-                            $keyboardRow = [];
-                        }
+                    $keyboardRow[] = $button;
 
-                        $rowCounter++;
+                    if ($rowCounter % 1 == 0 || count($elements) == $allRoutes) {
+                        $keyboard[] = $keyboardRow;
+                        $keyboardRow = [];
                     }
-                }
 
+                    $rowCounter++;
+                }
             }
 
         }
+
         return $keyboard;
+    }
+
+
+    /** Возвращает кнопку для добавление в избранное
+     * @param $stop
+     * @return array
+     */
+    protected function createFavoriteStopButton($stop): array
+    {
+        return  [
+            [
+                'text' => "🖤 Добавить в избранные",
+                'callback_data' =>  json_encode([
+                    'callbackKey' => 'createFavorite',
+                    'data' => $stop
+                ]),
+            ]
+        ];
+    }
+
+    /**Возвращает кнопку для удаление из избранных
+     * @param $stop
+     * @return array[]
+     */
+    protected function deleteFavoriteStopButton($stop): array
+    {
+        return  [
+            [
+                'text' => "❤ Удалить из избранных",
+                'callback_data' =>  json_encode([
+                    'callbackKey' => 'deleteFavorite',
+                    'data' => $stop
+                ]),
+            ]
+        ];
     }
 
 }

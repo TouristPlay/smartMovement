@@ -26,7 +26,7 @@ Route::group(['prefix' => 'autocomplete'], function () {
 // TODO маршрут от и до
 // TODO хранить у каждой остановке транспорт или хранить маршрут транспорта отдельно
 //
-//
+// TODO ТЯНУТЬ РАССТОЯНИЕ СРАЗУ С БД
 //\App\Model\User::whereNotIn('id', $ids)
 //    ->where('status', 1)
 //    ->whereHas('user_location', function($q) use ($radius, $coordinates) {

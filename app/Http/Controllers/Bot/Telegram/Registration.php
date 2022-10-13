@@ -2,6 +2,7 @@
 
 
 use App\Models\User;
+use App\Services\Bot\Helper;
 use GuzzleHttp\Exception\GuzzleException;
 
 
@@ -44,6 +45,34 @@ class Registration extends TelegramOptions{
      * @throws GuzzleException
      */
     private function sendHelloMessage() {
-        $this->telegram->sendMessage($this->chatId, "А я сейчас вам покажу, откуда на Беларусь готовилось нападение (с) Лукашенко");
+//        $this->telegram->sendMessage($this->chatId, "А я сейчас вам покажу, откуда на Беларусь готовилось нападение (с) Лукашенко", [
+//            'reply_markup' => [
+//                'keyboard' => [
+//                   [
+//                     [
+//                         'text' => '🗺 Отправить геолокацию ',
+//                         'request_location' => true
+//                     ]
+//                   ]
+//                ],
+//                'resize_keyboard' => true
+//            ]
+//        ]);
+
+
+        $this->telegram->sendPhoto($this->chatId, "https://ibb.co/MMkmYxr", [
+            'reply_markup' => [
+                'keyboard' => [
+                   [
+                     [
+                         'text' => '🗺 Отправить геолокацию ',
+                         'request_location' => true
+                     ]
+                   ]
+                ],
+                'resize_keyboard' => true
+            ],
+            'caption' => Helper::escapingCharacter('А я сейчас вам покажу, откуда на Беларусь готовилось нападение')
+        ]);
     }
 }

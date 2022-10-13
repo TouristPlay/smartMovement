@@ -33,7 +33,10 @@ class Telegram extends TelegramOptions
         $menu = new TelegramMenu($this->options);
 
         // Обрабатываем геолокацию
-        if (isset($this->user) && isset($this->options['data']['message']['location']) || $this->messageIsMenuKey($callbackKey)) {
+        if (isset($this->user) && isset($this->options['data']['message']['location'])
+            || $this->messageIsMenuKey($callbackKey)
+            || $this->messageIsMenuKey($this->message)
+        ) {
 
             $location = $this->options['data']['message']['location'] ?? null;
 
@@ -47,7 +50,11 @@ class Telegram extends TelegramOptions
     private function messageIsMenuKey($key) : bool {
 
         $keys = [
-            'stops'
+            'stops',
+            'deleteFavorite',
+            'createFavorite',
+            'transports',
+            '/favorite'
         ];
 
         return in_array($key, $keys);

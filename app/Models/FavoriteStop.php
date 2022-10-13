@@ -7,31 +7,30 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class User extends Model
+class FavoriteStop extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-      'username',
-      'chat_id',
-      'first_name',
-      'last_name',
+        'user_id',
+        'stop_id'
     ];
+
+    /**
+     * @return HasOne
+     */
+    public function stop(): HasOne
+    {
+        return $this->hasOne(Stop::class);
+    }
 
     /**
      * @return belongsTo
      */
-    public function message(): belongsTo
+    public function user(): belongsTo
     {
-        return $this->belongsTo(Message::class);
-    }
-
-    /**
-     * @return hasMany
-     */
-    public function favorite(): hasMany
-    {
-        return $this->hasMany(FavoriteStop::class);
+        return $this->belongsTo(User::class);
     }
 }

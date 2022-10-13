@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Bot\Webhooks;
 
 use App\Jobs\TelegramHandler;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 
 class TelegramWebhook

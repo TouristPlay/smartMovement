@@ -117,4 +117,45 @@ class TelegramMethods extends TelegramBotAPI {
 
         return $this->sendRequest('editMessageReplyMarkup', $query);
     }
+
+    /**
+     *  Метод отправляет сообщение пользователю
+     *
+     *   https://core.telegram.org/bots/api#sendmessage
+     *
+     * В options указывается следующее по желанию
+     *  $options = [
+     *      'disable_web_page_preview' => false/true // Отключает превью ссылок
+     *      'disable_notification' => false/true // Отключает звук уведоиления
+     *      'protect_content' => false/true // Отключает пересылку сообщения
+     *      'reply_to_message_id' => integer // ID ответного сообщения
+     *      'allow_sending_without_reply' => true/false // Отпарвка сообщения, если ответного сообщения не найдно
+     *      'reply_markup' => [Объект клавиатуры] // см в документации апи телеграма
+     * ]
+     *
+     * @param $chat_id
+     * @param $photo
+     * @param array $options
+     * @param bool $escaping
+     * @param string $parse_mode
+     * @return false|mixed
+     * @throws GuzzleException
+     */
+    public function sendPhoto($chat_id, $photo, array $options = [], bool $escaping = true, string $parse_mode = 'MarkdownV2') {
+
+        $query = [
+            'chat_id' => $chat_id,
+            'photo' => $photo,
+            'parse_mode' => $parse_mode,
+        ];
+
+
+        // Если есть клавиатура
+        if (isset($options['reply_markup'])) {
+            $options['reply_markup'] = json_encode($options['reply_markup'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
+        }
+
+
+        return $this->sendRequest('sendPhoto', array_merge([], $query, $options));
+    }
 }

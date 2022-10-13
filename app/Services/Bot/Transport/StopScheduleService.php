@@ -7,9 +7,14 @@ use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
+use Illuminate\Support\Facades\Log;
 
 class StopScheduleService {
 
+    /** Остановка
+     * @var
+     */
+    protected $stop;
 
     /**
      * @param $stop
@@ -17,6 +22,8 @@ class StopScheduleService {
      */
     public function getStopSchedule($stop): array
     {
+
+        $this->stop = $stop;
 
         $desiredCapabilities = DesiredCapabilities::chrome();
 
@@ -33,7 +40,7 @@ class StopScheduleService {
         $driver = RemoteWebDriver::create(config('app.selenium.url'), $desiredCapabilities);
 
         $driver->get($stop->url);
-        sleep(1);
+        sleep(2);
 
         $schedule = $driver->findElement(WebDriverBy::className("masstransit-brief-schedule-view__vehicles"));
 
@@ -63,11 +70,10 @@ class StopScheduleService {
         foreach ($types as $key => $type) {
             $schedulesByType = $schedules->findElements(WebDriverBy::className($type));
 
-            $scheduleCategory[] = [
-                $key => $this->getTransportSchedule($schedulesByType),
-            ];
+            $scheduleCategory[$key] = $this->getTransportSchedule($schedulesByType);
         }
 
+        $scheduleCategory['stop'] = $this->stop->id;
 
         return $scheduleCategory;
     }

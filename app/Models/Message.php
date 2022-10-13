@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Message extends Model
@@ -17,10 +18,10 @@ class Message extends Model
     ];
 
     /**
-     * @return HasMany
+     * @return BelongsToMany
      */
-    public function user(): HasMany
+    public function user(): BelongsToMany
     {
-        return $this->hasMany(User::class);
+        return $this->BelongsToMany(User::class);
     }
 }

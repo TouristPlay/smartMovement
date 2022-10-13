@@ -79,7 +79,7 @@ class SyncStop implements ShouldQueue
         $driver = RemoteWebDriver::create(config('app.selenium.url'), $desiredCapabilities);
 
         $driver->get('https://yandex.ru/maps/?ll=' . $coordinate['longitude'] . '%2C' . $coordinate['latitude'] . '&mode=search&text=Остановки%20общественного%20транспорта&z=12');
-        sleep(1);
+        sleep(5);
 
         $this->scrollStopView($driver);
 

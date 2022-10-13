@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Stop extends Model
@@ -27,5 +29,13 @@ class Stop extends Model
     public function city(): HasOne
     {
         return $this->hasOne(City::class);
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function favorite() : BelongsToMany
+    {
+        return $this->BelongsToMany(FavoriteStop::class);
     }
 }
