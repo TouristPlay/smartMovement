@@ -26,4 +26,12 @@ class Transport extends Model
     {
         return $this->hasMany(City::class);
     }
+
+    /**
+     * @return HasMany
+     */
+    public function route(): HasMany
+    {
+        return $this->hasMany(Route::class);
+    }
 }

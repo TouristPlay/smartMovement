@@ -14,10 +14,30 @@ class InlineKeyboard extends Keyboard
     }
 
     /**
-     * @return void
+     * @return array // TODO сделать возврат в это меню
      */
-    public function getMainMenu() {
-
+    public function getMainMenu(): array
+    {
+        return [
+            'inline_keyboard' =>[
+                [
+                    [
+                        'text' => "Расписание",
+                        'callback_data' =>  json_encode([
+                            'callbackKey' => 'schedule',
+                        ]),
+                    ],
+                ],
+                [
+                    [
+                        'text' => "Проложить маршрут",
+                        'callback_data' =>  json_encode([
+                            'callbackKey' => 'buildRoute',
+                        ]),
+                    ],
+                ]
+            ],
+        ];
     }
 
 
@@ -55,9 +75,12 @@ class InlineKeyboard extends Keyboard
             'inline_keyboard' => $this->generateStopsScheduleKeyboard($stopsSchedule),
         ];
 
-        $scheduleMenu['inline_keyboard'][] = $this->isFavoriteStop($stopsSchedule['stop'])
-            ? $this->deleteFavoriteStopButton($stopsSchedule['stop'])
-            : $this->createFavoriteStopButton($stopsSchedule['stop']);
+        if (isset($stopsSchedule['stop'])) {
+            $scheduleMenu['inline_keyboard'][] = $this->isFavoriteStop($stopsSchedule['stop'])
+                ? $this->deleteFavoriteStopButton($stopsSchedule['stop'])
+                : $this->createFavoriteStopButton($stopsSchedule['stop']);
+        }
+
 
 
         return $scheduleMenu;

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Bot\Telegram\Keyboard;
 
+use Illuminate\Support\Facades\Log;
+
 class Keyboard
 {
 
@@ -65,7 +67,7 @@ class Keyboard
 
         foreach ($elements as $key => $element) {
 
-            if ($key == "stop") continue;
+            if ($key == "stop" || empty($element)) continue;
 
             $allRoutes += count($element);
 

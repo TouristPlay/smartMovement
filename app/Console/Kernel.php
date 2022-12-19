@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Jobs\MessageUpdater;
 use App\Jobs\SyncStop;
 use App\Jobs\SyncTransport;
+use App\Jobs\SyncTransportRoute;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -21,6 +22,7 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             SyncStop::dispatch();
             SyncTransport::dispatch();
+            SyncTransportRoute::dispatch();
         })->dailyAt('03:00')->timezone('Europe/Moscow');
 
         $schedule->call(function () {

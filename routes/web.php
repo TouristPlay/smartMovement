@@ -19,17 +19,13 @@ Route::group(['prefix' => 'autocomplete'], function () {
    Route::get('/transport', [\App\Jobs\SyncTransport::class, 'handle']);
 });
 
-// TODO подумать как хранить роуты маршрутов или хранить в каждой остановке его роуты
-// TODO nested tree
-// TODO посмотреть метод отправки карты пользователю в тг
-// TODO хранить именование траспорта с его ID bus_66
-// TODO маршрут от и до
-// TODO хранить у каждой остановке транспорт или хранить маршрут транспорта отдельно
-//
-// TODO ТЯНУТЬ РАССТОЯНИЕ СРАЗУ С БД
-//\App\Model\User::whereNotIn('id', $ids)
-//    ->where('status', 1)
-//    ->whereHas('user_location', function($q) use ($radius, $coordinates) {
-//        $q->whereRaw("111.045*haversine(latitude, longitude, '{$coordinates['latitude']}', '{$coordinates['longitude']}') <= " . $radius]);
-//     })->select('id', 'firstname')
-//    ->get();
+
+Route::get('/tester', function () {
+
+    $stopService = new \App\Services\Bot\Transport\StopService();
+
+    $stopService->getStopsAroundUser([
+        'longitude' => 45.224284,
+        'latitude' => 54.185382,
+    ]);
+});

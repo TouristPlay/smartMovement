@@ -12,6 +12,7 @@ use App\Services\Bot\Helper;
 use App\Services\Bot\Transport\StopScheduleService;
 use App\Services\Bot\Transport\StopService;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
 
 class TelegramMenu extends TelegramOptions
 {
@@ -60,11 +61,47 @@ class TelegramMenu extends TelegramOptions
 
         $this->systemMessage = Message::query()->whereUserId($this->user->id)->first() ?? null;
 
-        if ($this->callbackKey == 'stops') {
-            $this->stopsHandler($this->callbackData['data']);
+        if ($this->callbackKey == 'stops' && $this->systemMessage->action == null) {
+
+            $this->deleteMessage();
+
+            $botMessage = $this->telegram->sendMessage($this->user->chat_id, "Выберите пункт меню",
+                ['reply_markup' => $this->inlineKeyboard->getMainMenu()],
+                false
+            );
+
+            $stop = Stop::query()->whereId($this->callbackData['data'])->first();
+
+            $this->systemMessage->update([
+                'message_id' => $botMessage['result']['message_id'],
+                'from_stop_id' => $stop->id
+            ]);
+
             return;
         }
 
+        if ($this->callbackKey == 'schedule') {
+            $this->stopsHandler($this->systemMessage->from_stop_id);
+            return;
+        }
+
+        if ($this->callbackKey == 'buildRoute' && $this->callbackKey != 'stops') {
+
+            $this->deleteMessage();
+
+            $botMessage = $this->telegram->sendMessage($this->user->chat_id, "Отправьте координаты конечной остановки",
+                [],//['reply_markup' => $this->inlineKeyboard->getMainMenu()],
+                false
+            );
+
+            $this->systemMessage->update([
+                'message_id' => $botMessage['result']['message_id'],
+                'action' => $this->callbackKey
+            ]);
+            return;
+        }
+
+        // Вывод избранных остановок
         if ($this->message == '/favorite') {
 
             $this->deleteMessage();
@@ -76,12 +113,14 @@ class TelegramMenu extends TelegramOptions
             return;
         }
 
+        // Добавление в избранные
         if ($this->callbackKey == 'createFavorite') {
             $this->saveFavorite($this->callbackData['data']);
             $this->stopsHandler($this->callbackData['data']);
             return;
         }
 
+        // Удаление из избранных
         if ($this->callbackKey == 'deleteFavorite') {
             $this->deleteFavorite($this->callbackData['data']);
             $this->stopsHandler($this->callbackData['data']);
@@ -89,13 +128,74 @@ class TelegramMenu extends TelegramOptions
         }
 
 
+        if ($this->callbackKey == 'stops') {
+            $this->systemMessage->update([
+                'to_stop_id' => $this->callbackData['data']
+            ]);
+
+
+            $this->buildRouteHandler();
+            return;
+        }
+
+
+        if (isset($this->systemMessage) && $this->systemMessage->action == 'buildRoute') {
+            $stops = $this->stopService->getStopsAroundUser($coords);
+            $stopKeyboard = $this->inlineKeyboard->getAroundStopsMenu($stops);
+
+            $botMessage = $this->telegram->sendMessage($this->user->chat_id, "Выберите конечную остановку", ['reply_markup' => $stopKeyboard]);
+
+            $this->systemMessage->update([
+                'message_id' => $botMessage['result']['message_id'],
+            ]);
+
+            return;
+        }
+
         $stops = $this->stopService->getStopsAroundUser($coords);
         $stopKeyboard = $this->inlineKeyboard->getAroundStopsMenu($stops);
+
         $botMessage = $this->telegram->sendMessage($this->user->chat_id, "Выберите остановку", ['reply_markup' => $stopKeyboard]);
-
-
         $this->deleteMessage();
         $this->saveMessage($botMessage['result']['message_id']);
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    private function buildRouteHandler() {
+
+        $fromStop = Stop::query()->whereId($this->systemMessage->from_stop_id)->first();
+        $toStop = Stop::query()->whereId($this->systemMessage->to_stop_id)->first();
+
+        $fromTransport = $this->stopSchedule->getStopSchedule($fromStop);
+        $toTransport = $this->stopSchedule->getStopSchedule($toStop);
+
+        $bus = collect(array_merge($fromTransport['bus'], $toTransport['bus']));
+        $minibus = collect(array_merge($fromTransport['minibus'], $toTransport['minibus']));
+        $trolleybus = collect(array_merge($fromTransport['trolleybus'], $toTransport['trolleybus']));
+
+        $uniqueTransport = [
+            'bus' => $bus->whereIn('name', $bus->duplicates('name'))->toArray(),
+            'minibus' => $minibus->whereIn('name', $minibus->duplicates('name'))->unique('name')->toArray(),
+            'trolleybus' => $trolleybus->whereIn('name', $trolleybus->duplicates('name'))->toArray(),
+        ];
+
+
+        $transportKeyboard = $this->inlineKeyboard->getStopScheduleMenu($uniqueTransport);
+
+        $this->telegram->deleteMessage($this->user->chat_id, $this->systemMessage->message_id);
+
+        $botMessage = $this->telegram->sendMessage($this->user->chat_id,
+            "Маршруты от остановки *" . Helper::escapingCharacter($fromStop->name) . "* до *" . $toStop->name . "*\n",
+            ['reply_markup' => $transportKeyboard],
+            false
+        );
+
+        $this->systemMessage->delete();
+//        $this->systemMessage->update([
+//            'message_id' => $botMessage['result']['message_id'],
+//        ]);
     }
 
     /**
@@ -115,7 +215,12 @@ class TelegramMenu extends TelegramOptions
             false
         );
 
-        $this->updateMessage($botMessage['result']['message_id'], $this->systemMessage, $stop);
+
+        $this->systemMessage->update([
+            'message_id' => $botMessage['result']['message_id'],
+            'from_stop_id' => $stop->id,
+            'action' => $this->callbackKey
+        ]);
 
         //$this->telegram->editMessageText($this->user->chat_id, $message->message_id, "Маршруты остановки *" . $stop->name . "*\n");
         //$this->telegram->editMessageReplyMarkup($this->user->chat_id, $message->message_id, ['reply_markup' => $transportKeyboard]);
@@ -128,23 +233,10 @@ class TelegramMenu extends TelegramOptions
      */
     private function saveMessage($messageId) {
         $message = Message::query()->firstOrNew([
-            'message_id' => $messageId,
             'user_id' => $this->user->id,
         ]);
+        $message->message_id = $messageId;
         $message->save();
-    }
-
-    /**
-     * @param $messageId
-     * @param $message
-     * @param $stop
-     * @return void
-     */
-    private function updateMessage($messageId, $message, $stop) {
-        $message->update([
-            'message_id' => $messageId,
-            'stop_id' => $stop->id
-        ]);
     }
 
     /**
@@ -153,7 +245,6 @@ class TelegramMenu extends TelegramOptions
     private function deleteMessage() {
         if (isset($this->systemMessage)) {
             $this->telegram->deleteMessage($this->user->chat_id, $this->systemMessage->message_id);
-            $this->systemMessage->delete();
         }
     }
 
@@ -166,7 +257,7 @@ class TelegramMenu extends TelegramOptions
             'user_id' => $this->user->id,
             'stop_id' => $stop
         ]);
-        $favorite->save();
+        $favorite->save(); // TODO при посторном выборе остановки, он выводит маршурты между двух остановокв
     }
 
     /**

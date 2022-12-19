@@ -14,7 +14,9 @@ class Message extends Model
     protected $fillable = [
         'user_id',
         'message_id',
-        'stop_id'
+        'action',
+        'to_stop_id',
+        'from_stop_id',
     ];
 
     /**

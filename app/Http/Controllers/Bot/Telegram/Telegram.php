@@ -54,7 +54,9 @@ class Telegram extends TelegramOptions
             'deleteFavorite',
             'createFavorite',
             'transports',
-            '/favorite'
+            '/favorite',
+            'buildRoute',
+            'schedule'
         ];
 
         return in_array($key, $keys);

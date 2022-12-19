@@ -17,7 +17,9 @@ class CreateMessagesTable extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('message_id');
-            $table->unsignedBigInteger('stop_id')->nullable();
+            $table->unsignedBigInteger('from_stop_id')->nullable();
+            $table->unsignedBigInteger('to_stop_id')->nullable();
+            $table->string('action')->nullable();
             $table->string('location')->nullable();
             $table->timestamps();
 
